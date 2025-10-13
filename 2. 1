@@ -1,0 +1,210 @@
+use Accident;
+Database changed
+
+create table Person (
+    driver_id int primary key,
+    name varchar(20),
+    address varchar(50)
+);
+Query OK, 0 rows affected (0.05 sec)
+
+create table Car (
+    licence varchar(20) primary key,
+    model varchar(20),
+    year year
+);
+Query OK, 0 rows affected (0.03 sec)
+
+create table Accident (
+    report_no int primary key,
+    date_cc date,
+    location varchar(50)
+);
+Query OK, 0 rows affected (0.03 sec)
+
+desc Person;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| driver_id | int         | NO   | PRI | NULL    |       |
+| name      | varchar(20) | YES  |     | NULL    |       |
+| address   | varchar(50) | YES  |     | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+3 rows in set (0.02 sec)
+
+desc Car;
++---------+-------------+------+-----+---------+-------+
+| Field   | Type        | Null | Key | Default | Extra |
++---------+-------------+------+-----+---------+-------+
+| licence | varchar(20) | NO   | PRI | NULL    |       |
+| model   | varchar(20) | YES  |     | NULL    |       |
+| year    | year        | YES  |     | NULL    |       |
++---------+-------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+desc Accident;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| report_no | int         | NO   | PRI | NULL    |       |
+| date_cc   | date        | YES  |     | NULL    |       |
+| location  | varchar(50) | YES  |     | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+insert into Accident values
+    (1, '02/10/2025', 'NIGADI'),
+    (2, '03/10/2025', 'AKURDI'),
+    (3, '06/11/2025', 'DEHU'),
+    (4, '01/12/2005', 'DEHUROAD');
+ERROR 1292 (22007): Incorrect date value: '02/10/2025' for column 'date_cc' at row 1
+
+insert into Accident values
+    (1, '2025/10/02', 'NIGADI'),
+    (2, '2025/10/03', 'AKURDI'),
+    (3, '2025/11/06', 'DEHU'),
+    (4, '2005/12/09', 'DEHUROAD');
+Query OK, 4 rows affected, 4 warnings (0.01 sec)
+Records: 4 Duplicates: 0 Warnings: 4
+
+select * from Person;
++-----------+---------+-----------+
+| driver_id | name    | address   |
++-----------+---------+-----------+
+| 1         | krushna | Nigadi    |
+| 2         | harshal | pune      |
+| 3         | Aditya  | dehuroad  |
+| 4         | parth   | chichwad  |
++-----------+---------+-----------+
+4 rows in set (0.01 sec)
+
+select * from Car;
++---------+---------+------+
+| licence | model   | year |
++---------+---------+------+
+| SE001   | TOYOTA  | 2005 |
+| SE002   | THAR    | 2004 |
+| SE003   | MAHINDRA| 2002 |
+| SE004   | ENOVA   | 2003 |
++---------+---------+------+
+4 rows in set (0.00 sec)
+
+select * from Accident;
++-----------+------------+----------+
+| report_no | date_cc    | location |
++-----------+------------+----------+
+| 1         | 2025-10-02 | NIGADI   |
+| 2         | 2025-10-03 | AKURDI   |
+| 3         | 2025-11-06 | DEHU     |
+| 4         | 2005-12-09 | DEHUROAD |
++-----------+------------+----------+
+4 rows in set (0.00 sec)
+
+create table Owns (
+    driver_id int references Person(driver_id),
+    license varchar(20)
+);
+Query OK, 0 rows affected (0.03 sec)
+
+create table Participated (
+    driver_id int,
+    model varchar(20),
+    report_no int references Accident(report_no),
+    damage_amt int check (damage_amt > 0)
+);
+Query OK, 0 rows affected (0.04 sec)
+
+insert into Owns values
+    (1, 'SE001'),
+    (2, 'SE002'),
+    (3, 'SE003'),
+    (4, 'SE004');
+Query OK, 4 rows affected (0.02 sec)
+Records: 4 Duplicates: 0 Warnings: 0
+
+insert into Participated values
+    (1, 'TOYOTA', 1, 12000),
+    (2, 'THAR', 2, 25000),
+    (3, 'MAHINDRA', 3, 120000),
+    (4, 'ENOVA', 4, 500);
+Query OK, 4 rows affected (0.02 sec)
+Records: 4 Duplicates: 0 Warnings: 0
+
+select * from Owns;
++-----------+---------+
+| driver_id | license |
++-----------+---------+
+| 1         | SE001   |
+| 2         | SE002   |
+| 3         | SE003   |
+| 4         | SE004   |
++-----------+---------+
+4 rows in set (0.00 sec)
+
+select * from Participated;
++-----------+----------+-----------+------------+
+| driver_id | model    | report_no | damage_amt |
++-----------+----------+-----------+------------+
+| 1         | TOYOTA   | 1         | 12000      |
+| 2         | THAR     | 2         | 25000      |
+| 3         | MAHINDRA | 3         | 120000     |
+| 4         | ENOVA    | 4         | 500        |
++-----------+----------+-----------+------------+
+4 rows in set (0.00 sec)
+
+create index idx_report_no on Accident(report_no);
+Query OK, 0 rows affected (0.06 sec)
+Records: 0 Duplicates: 0 Warnings: 0
+
+create index idx_owns_drive_license on Owns(driver_id, license);
+Query OK, 0 rows affected (0.04 sec)
+Records: 0 Duplicates: 0 Warnings: 0
+
+create view accident_report_views as select report_no, location from Accident;
+Query OK, 0 rows affected (0.02 sec)
+
+select * from accident_report_views;
++-----------+----------+
+| report_no | location |
++-----------+----------+
+| 1         | NIGADI   |
+| 2         | AKURDI   |
+| 3         | DEHU     |
+| 4         | DEHUROAD |
++-----------+----------+
+4 rows in set (0.01 sec)
+
+create view cars_after_2018 as select license, model, year from Car where year > 2018;
+Query OK, 0 rows affected (0.01 sec)
+
+select * from cars_after_2018;
+Empty set (0.00 sec)
+
+alter table Accident modify report_no int auto_increment;
+Query OK, 4 rows affected (0.09 sec)
+Records: 4 Duplicates: 0 Warnings: 0
+
+select * from Accident;
++-----------+------------+----------+
+| report_no | date_cc    | location |
++-----------+------------+----------+
+| 1         | 2025-10-02 | NIGADI   |
+| 2         | 2025-10-03 | AKURDI   |
+| 3         | 2025-11-06 | DEHU     |
+| 4         | 2005-12-09 | DEHUROAD |
++-----------+------------+----------+
+4 rows in set (0.00 sec)
+
+create view ACC as select * from Accident;
+Query OK, 0 rows affected (0.02 sec)
+
+select * from ACC;
++-----------+------------+----------+
+| report_no | date_cc    | location |
++-----------+------------+----------+
+| 1         | 2025-10-02 | NIGADI   |
+| 2         | 2025-10-03 | AKURDI   |
+| 3         | 2025-11-06 | DEHU     |
+| 4         | 2005-12-09 | DEHUROAD |
++-----------+------------+----------+
+4 rows in set (0.00 sec)
