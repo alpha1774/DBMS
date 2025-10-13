@@ -1,0 +1,74 @@
+MongoDB Shell Commands
+> use collage
+switched to db collage
+
+> show dbs
+admin           0.000GB
+config          0.000GB
+local           0.000GB
+myDatabase      0.000GB
+product_detail  0.000GB
+
+> db.createCollection("student")
+{ "ok" : 1 }
+
+> show collections
+student
+
+> db.student.insertMany([
+  { roll: 1, name: "vd", course: "DBMS", marks: 85 },
+  { roll: 2, name: "abc", course: "CNS", marks: 75 },
+  { roll: 3, name: "xyz", course: "Physics", marks: 90 },
+  { roll: 4, name: "pqr", course: "Physics", marks: 70 },
+  { roll: 5, name: "adt", course: "Chemistry", marks: 88 }
+]);
+
+{
+  "acknowledged": true,
+  "insertedIds": [
+    ObjectId("68e38364e0f98585036414c1"),
+    ObjectId("68e38364e0f98585036414c2"),
+    ObjectId("68e38364e0f98585036414c3"),
+    ObjectId("68e38364e0f98585036414c4"),
+    ObjectId("68e38364e0f98585036414c5")
+  ]
+}
+
+
+Aggregation Example (Average Marks by Course)
+> db.student.aggregate([
+  {
+    $group: {
+      _id: "$course",
+      totalMarks: { $sum: "$marks" },
+      count: { $sum: 1 },
+      averageMarks: { $avg: "$marks" }
+    }
+  }
+]).pretty();
+
+Output
+{
+  "_id": "CNS",
+  "totalMarks": 75,
+  "count": 1,
+  "averageMarks": 75
+}
+{
+  "_id": "DBMS",
+  "totalMarks": 85,
+  "count": 1,
+  "averageMarks": 85
+}
+{
+  "_id": "Chemistry",
+  "totalMarks": 88,
+  "count": 1,
+  "averageMarks": 88
+}
+{
+  "_id": "Physics",
+  "totalMarks": 160,
+  "count": 2,
+  "averageMarks": 80
+}
