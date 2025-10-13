@@ -1,0 +1,68 @@
+MongoDB Shell Commands
+> show dbs
+admin           0.000GB
+config          0.000GB
+local           0.000GB
+myDatabase      0.000GB
+
+> use product_detail
+switched to db product_detail
+
+> show dbs
+admin           0.000GB
+config          0.000GB
+local           0.000GB
+myDatabase      0.000GB
+
+> db.createCollection("product")
+{ "ok": 1 }
+
+> show collections
+product
+
+> db.product.find({}).pretty()
+{ }
+
+> db.product.createIndex({ "price": 1 })
+{
+  "numIndexesBefore": 3,
+  "numIndexesAfter": 3,
+  "note": "all indexes already exist",
+  "ok": 1
+}
+
+Aggregation Example
+> db.product.aggregate([
+  {
+    $project: {
+      item: 1,
+      total_sales: { $multiply: ["$price", "$quantity"] }
+    }
+  },
+  {
+    $sort: { total_sales: -1 }
+  }
+]);
+
+OUTPUT
+{
+  "_id": ObjectId("68e37df0e0f98585036414bd"),
+  "item": "book",
+  "total_sales": 50
+}
+{
+  "_id": ObjectId("68e37df0e0f98585036414be"),
+  "item": "pen",
+  "total_sales": 20
+}
+{
+  "_id": ObjectId("68e37df0e0f98585036414bf"),
+  "item": "pen",
+  "total_sales": 50
+}
+{
+  "_id": ObjectId("68e37df0e0f98585036414c0"),
+  "item": "pencil",
+  "total_sales": 50
+}
+
