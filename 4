@@ -1,0 +1,275 @@
+use ass4;
+Database changed
+
+create table employee(
+    ename varchar(20) primary key,
+    street varchar(20),
+    city varchar(20)
+);
+
+Query OK, 0 rows affected (0.54 sec)
+
+insert into employee values
+    ('Rutuja', 'G-26', 'Jamnagar');
+Query OK, 1 row affected (0.10 sec)
+
+insert into employee values
+    ('Snigdha', 'Khodiyar Colony', 'Noida'),
+    ('Dwiti', 'Patel Colony', 'Vadodara'),
+    ('Pranjul', 'Nandan One', 'Ahmedabad'),
+    ('Sidhant', 'Mansarovar', 'Bhopal');
+Query OK, 4 rows affected (0.07 sec)
+
+Records: 4 Duplicates: 0 Warnings: 0
+
+desc employee;
++--------+-------------+------+-----+---------+-------+
+| Field  | Type        | Null | Key | Default | Extra |
++--------+-------------+------+-----+---------+-------+
+| ename  | varchar(20) | NO   | PRI | NULL    |       |
+| street | varchar(20) | YES  |     | NULL    |       |
+| city   | varchar(20) | YES  |     | NULL    |       |
++--------+-------------+------+-----+---------+-------+
+3 rows in set (0.11 sec)
+
+select * from employee;
++---------+-----------------+-----------+
+| ename   | street          | city      |
++---------+-----------------+-----------+
+| Dwiti   | Patel Colony    | Vadodara  |
+| Pranjul | Nandan One      | Ahmedabad |
+| Rutuja  | G-26            | Jamnagar  |
+| Sidhant | Mansarovar      | Bhopal    |
+| Snigdha | Khodiyar Colony | Noida     |
++---------+-----------------+-----------+
+5 rows in set (0.00 sec)
+
+create table company(
+    cname varchar(20) primary key,
+    city varchar(20)
+);
+
+Query OK, 0 rows affected (0.42 sec)
+
+desc company;
++-------+-------------+------+-----+---------+-------+
+| Field | Type        | Null | Key | Default | Extra |
++-------+-------------+------+-----+---------+-------+
+| cname | varchar(20) | NO   | PRI | NULL    |       |
+| city  | varchar(20) | YES  |     | NULL    |       |
++-------+-------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+insert into company values
+    ('Amazon', 'Vadodara'),
+    ('Flipkart', 'Jamnagar'),
+    ('TCS', 'Pune'),
+    ('Wipro', 'Mumbai'),
+    ('Google', 'Ahmedabad');
+
+Query OK, 5 rows affected (0.17 sec)
+
+Records: 5 Duplicates: 0 Warnings: 0
+
+select * from company;
++----------+-----------+
+| cname    | city      |
++----------+-----------+
+| Amazon   | Vadodara  |
+| Flipkart | Jamnagar  |
+| Google   | Ahmedabad |
+| TCS      | Pune      |
+| Wipro    | Mumbai    |
++----------+-----------+
+5 rows in set (0.00 sec)
+
+create table work(
+    ename varchar(20) references employee(ename),
+    cname varchar(20) references company(cname),
+    salary int
+);
+
+Query OK, 0 rows affected (0.34 sec)
+
+desc work;
++--------+-------------+------+-----+---------+-------+
+| Field  | Type        | Null | Key | Default | Extra |
++--------+-------------+------+-----+---------+-------+
+| ename  | varchar(20) | YES  |     | NULL    |       |
+| cname  | varchar(20) | YES  |     | NULL    |       |
+| salary | int         | YES  |     | NULL    |       |
++--------+-------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+insert into work values
+    ('Snigdha', 'Wipro', 50000),
+    ('Pranjul', 'Google', 1200000),
+    ('Sahil', 'Amazon', 480000),
+    ('Anisha', 'Microsoft', 67000),
+    ('Rutuja', 'Barclays', 550000);
+Query OK, 5 rows affected (0.10 sec)
+
+Records: 5 Duplicates: 0 Warnings: 0
+
+select * from work;
++---------+-----------+---------+
+| ename   | cname     | salary  |
++---------+-----------+---------+
+| Snigdha | Wipro     | 50000   |
+| Pranjul | Google    | 1200000 |
+| Sahil   | Amazon    | 480000  |
+| Anisha  | Microsoft | 67000   |
+| Rutuja  | Barclays  | 550000  |
++---------+-----------+---------+
+5 rows in set (0.00 sec)
+
+create table manages(
+    ename varchar(20) references employee(ename),
+    mname varchar(20)
+);
+
+Query OK, 0 rows affected (0.53 sec)
+
+desc manages;
++-------+-------------+------+-----+---------+-------+
+| Field | Type        | Null | Key | Default | Extra |
++-------+-------------+------+-----+---------+-------+
+| ename | varchar(20) | YES  |     | NULL    |       |
+| mname | varchar(20) | YES  |     | NULL    |       |
++-------+-------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+insert into manages values
+    ('Riya', 'Rutuja'),
+    ('Snigdha', 'Dwiti'),
+    ('Aditya', 'Kshitij'),
+    ('Pranjul', 'Rutuja'),
+    ('Vishakha', 'Sahil');
+Query OK, 5 rows affected (0.15 sec)
+
+Records: 5 Duplicates: 0 Warnings: 0
+
+select * from manages;
++----------+---------+
+| ename    | mname   |
++----------+---------+
+| Riya     | Rutuja  |
+| Snigdha  | Dwiti   |
+| Aditya   | Kshitij |
+| Pranjul  | Rutuja  |
+| Vishakha | Sahil   |
++----------+---------+
+5 rows in set (0.00 sec)
+
+select * from employee, company;
++---------+-----------------+-----------+----------+-----------+
+| ename   | street          | city      | cname    | city      |
++---------+-----------------+-----------+----------+-----------+
+| Snigdha | Khodiyar Colony | Noida     | Amazon   | Vadodara  |
+| Sidhant | Mansarovar      | Bhopal    | Amazon   | Vadodara  |
+| Rutuja  | G-26            | Jamnagar  | Amazon   | Vadodara  |
+| Pranjul | Nandan One      | Ahmedabad | Amazon   | Vadodara  |
+| Dwiti   | Patel Colony    | Vadodara  | Amazon   | Vadodara  |
+| Snigdha | Khodiyar Colony | Noida     | Flipkart | Jamnagar  |
+| Sidhant | Mansarovar      | Bhopal    | Flipkart | Jamnagar  |
+| Rutuja  | G-26            | Jamnagar  | Flipkart | Jamnagar  |
+| Pranjul | Nandan One      | Ahmedabad | Flipkart | Jamnagar  |
+| Dwiti   | Patel Colony    | Vadodara  | Flipkart | Jamnagar  |
+| Snigdha | Khodiyar Colony | Noida     | Google   | Ahmedabad |
+| Sidhant | Mansarovar      | Bhopal    | Google   | Ahmedabad |
+| Rutuja  | G-26            | Jamnagar  | Google   | Ahmedabad |
+| Pranjul | Nandan One      | Ahmedabad | Google   | Ahmedabad |
+| Dwiti   | Patel Colony    | Vadodara  | Google   | Ahmedabad |
+| Snigdha | Khodiyar Colony | Noida     | TCS      | Pune      |
+| Sidhant | Mansarovar      | Bhopal    | TCS      | Pune      |
+| Rutuja  | G-26            | Jamnagar  | TCS      | Pune      |
+| Pranjul | Nandan One      | Ahmedabad | TCS      | Pune      |
+| Dwiti   | Patel Colony    | Vadodara  | TCS      | Pune      |
+| Snigdha | Khodiyar Colony | Noida     | Wipro    | Mumbai    |
+| Sidhant | Mansarovar      | Bhopal    | Wipro    | Mumbai    |
+| Rutuja  | G-26            | Jamnagar  | Wipro    | Mumbai    |
+| Pranjul | Nandan One      | Ahmedabad | Wipro    | Mumbai    |
+| Dwiti   | Patel Colony    | Vadodara  | Wipro    | Mumbai    |
++---------+-----------------+-----------+----------+-----------+
+25 rows in set (0.00 sec)
+
+select * from work where cname = 'Google';
++---------+--------+---------+
+| ename   | cname  | salary  |
++---------+--------+---------+
+| Pranjul | Google | 1200000 |
++---------+--------+---------+
+1 row in set (0.10 sec)
+
+select ename, city from employee e, work w where e.ename = w.ename and w.cname = 'Google';
+ERROR 1052 (23000): Column 'ename' in field list is ambiguous
+
+select e.ename, e.city from employee e, work w where e.ename = w.ename and w.cname = 'Google';
++---------+-----------+
+| ename   | city      |
++---------+-----------+
+| Pranjul | Ahmedabad |
++---------+-----------+
+1 row in set (0.00 sec)
+
+select e.ename, e.city from employee e
+inner join work w on e.ename = w.ename
+and w.cname = 'Google';
++---------+-----------+
+| ename   | city      |
++---------+-----------+
+| Pranjul | Ahmedabad |
++---------+-----------+
+1 row in set (0.00 sec)
+
+select ename, city from employee
+where ename = (
+    select ename from work
+    where cname = 'Google'
+);
++---------+-----------+
+| ename   | city      |
++---------+-----------+
+| Pranjul | Ahmedabad |
++---------+-----------+
+1 row in set (0.01 sec)
+
+select ename, street, city from employee
+where ename = (
+    select ename from work
+    where cname = 'Google'
+    and salary > 50000
+);
++---------+------------+-----------+
+| ename   | street     | city      |
++---------+------------+-----------+
+| Pranjul | Nandan One | Ahmedabad |
++---------+------------+-----------+
+1 row in set (0.00 sec)
+
+select e.ename from employee e
+where e.city in (
+    select c.city from work w, company c
+    where w.cname = c.cname
+);
++---------+
+| ename   |
++---------+
+| Dwiti   |
+| Pranjul |
++---------+
+2 rows in set (0.16 sec)
+
+select e.ename, e.street, e.city from employee e
+where e.ename = (
+    select m.ename from manages m, manages m1
+    where m.ename = m1.mname
+);
+Empty set (0.00 sec)
+
+select ename from work
+where salary > All (
+    select salary from work
+    where cname = 'Google'
+);
+Empty set (0.00 sec)
