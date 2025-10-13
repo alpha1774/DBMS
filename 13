@@ -1,0 +1,86 @@
+test> use Restaurants
+switched to db Restaurants
+
+Restaurants> db.createCollection("REST1")
+MongoServerError[NamespaceExists]: Collection Restaurants.REST1 already exists.
+
+Restaurants> db.REST1.insertOne({
+  "address": {
+    "building": "1007",
+    "coord": [-73.856077, 40.848447],
+    "street": "Morris Park Ave",
+    "zipcode": "10462"
+  },
+  "borough": "Bronx",
+  "cuisine": "Bakery",
+  "grades": [
+    { "date": { "$date": 1393804800000 }, "grade": "A", "score": 2 },
+    { "date": { "$date": 1378857600000 }, "grade": "A", "score": 6 },
+    { "date": { "$date": 1358985600000 }, "grade": "A", "score": 10 },
+    { "date": { "$date": 1322006400000 }, "grade": "A", "score": 9 },
+    { "date": { "$date": 1299715200000 }, "grade": "B", "score": 14 }
+  ],
+  "name": "Morris Park Bake Shop",
+  "restaurant_id": "30075445"
+})
+
+acknowledged: true,
+insertedId: ObjectId('68e360e515405aaa4acebea4')
+
+Restaurants> db.REST1.find()
+{
+  _id: ObjectId('68e35ecc7b8ebb08a7cebea4'),
+  address: {
+    building: '1007',
+    coord: [-73.856077, 40.848447],
+    street: 'Morris Park Ave',
+    zipcode: '10462'
+  },
+  borough: 'Bronx',
+  cuisine: 'Bakery',
+  grades: [
+    { date: { '$date': 1393804800000 }, grade: 'A', score: 2 },
+    { date: { '$date': 1378857600000 }, grade: 'A', score: 6 },
+    { date: { '$date': 1358985600000 }, grade: 'A', score: 10 },
+    { date: { '$date': 1322006400000 }, grade: 'A', score: 9 },
+    { date: { '$date': 1299715200000 }, grade: 'B', score: 14 }
+  ],
+  name: 'Morris Park Bake Shop',
+  restaurant_id: '30075445'
+}
+
+Restaurants> db.REST1.find({"grades.score": { $gt: 10, $lt: 100 }})
+
+{
+  _id: ObjectId('68e35ecc7b8ebb08a7cebea4'),
+  address: {
+    building: '1007',
+    coord: [-73.856077, 40.848447],
+    street: 'Morris Park Ave',
+    zipcode: '10462'
+  },
+  borough: 'Bronx',
+  cuisine: 'Bakery',
+  grades: [
+    { date: { '$date': 1358985600000 }, grade: 'A', score: 10 },
+    { date: { '$date': 1322006400000 }, grade: 'A', score: 9 },
+    { date: { '$date': 1299715200000 }, grade: 'B', score: 14 }
+  ],
+  name: 'Morris Park Bake Shop',
+  restaurant_id: '30075445'
+}
+
+Restaurants> db.REST1.find(
+  {},
+  { restaurant_id: 1, name: 1, borough: 1, "address.zipcode": 1, _id: 0 }
+)
+{
+  restaurant_id: '30075445',
+  name: 'Morris Park Bake Shop',
+  borough: 'Bronx',
+  address: { zipcode: '10462' }
+}
+
+Restaurants> db.REST1.find({"grades.score": { $gt: 90 }})
+Restaurants> db.REST1.find({"grades.score": { $gt: 10 }})
+Restaurants> db.REST1.find({"grades.score": { $gt: 80, $lt: 100 }})
