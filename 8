@@ -1,0 +1,91 @@
+Create the table
+
+CREATE TABLE library (
+  BOOKID NUMBER(38),
+  BNAME VARCHAR2(20),
+  BPRICE NUMBER(38)
+);
+
+CREATE TABLE library_audit (
+  BOOKID NUMBER(38),
+  BNAME VARCHAR2(20),
+  BPRICE NUMBER(38),
+  AUDIT_CHANGE VARCHAR2(20),
+  UPDATE_TIME DATE
+);
+
+
+Then describe it
+
+DESC library;
+DESC library_audit;
+
+-- Connect to the database (if not already connected)
+-- For example: SQL> CONNECT username/password@dbname;
+
+-- Describe the library table
+DESC library;
+
+-- Output:
+-- Name        Null?    Type
+-- ----------- -------- --------------------
+-- BOOKID               NUMBER(38)
+-- BNAME                VARCHAR2(20)
+-- BPRICE               NUMBER(38)
+
+-- Describe the library_audit table
+DESC library_audit;
+
+-- Output:
+-- Name         Null?    Type
+-- ------------ -------- --------------------
+-- BOOKID                NUMBER(38)
+-- BNAME                 VARCHAR2(20)
+-- BPRICE                NUMBER(38)
+-- AUDIT_CHANGE          VARCHAR2(20)
+-- UPDATE_TIME           DATE
+
+-- View all data in library table
+SELECT * FROM library;
+
+-- Sample output:
+-- BOOKID  BNAME   BPRICE
+-- ------  ------  ------
+-- 101     DBMS    250
+-- 102     PLSQL   400
+-- 103     CNS     350
+
+-- Create a trigger to audit updates and deletes
+CREATE OR REPLACE TRIGGER trig_update 
+AFTER DELETE OR UPDATE ON library 
+FOR EACH ROW
+DECLARE
+  au_ch VARCHAR(10);
+BEGIN
+  IF DELETING THEN
+    au_ch := 'DELETE';
+  END IF;
+
+  IF UPDATING THEN
+    au_ch := 'UPDATE';
+  END IF;
+
+  INSERT INTO library_audit
+  VALUES(:OLD.bookid, :OLD.bname, :OLD.bprice, au_ch, CURRENT_TIMESTAMP);
+END;
+/
+
+-- Execute trigger script
+@ass8_trig
+
+-- Update example
+UPDATE library SET bprice = 400 WHERE bookid = 101;
+
+-- Check audit table after update
+SELECT * FROM library_audit;
+
+-- Delete example
+DELETE FROM library WHERE bookid = 101;
+
+-- Check audit table after delete
+SELECT * FROM library_audit;
