@@ -1,0 +1,86 @@
+-- Create table to store student marks
+CREATE TABLE stud_marks (
+  name VARCHAR2(20),
+  total_marks INT
+);
+
+-- Describe the table
+DESC stud_marks;
+
+-- Insert student records using substitution variables
+INSERT INTO stud_marks VALUES ('Aditya', 875);
+INSERT INTO stud_marks VALUES ('Arnav', 1375);
+INSERT INTO stud_marks VALUES ('Arjun', 925);
+INSERT INTO stud_marks VALUES ('Ashish', 980);
+INSERT INTO stud_marks VALUES ('Amay', 1250);
+
+-- View inserted records
+SELECT * FROM stud_marks;
+
+-- Create result table
+CREATE TABLE result (
+  rollno INT,
+  name VARCHAR2(20),
+  class VARCHAR2(20)
+);
+
+-- Describe the table
+DESC result;
+
+-- View the result table (initially empty)
+SELECT * FROM result;
+
+-- Create a sequence for roll numbers
+CREATE SEQUENCE s2 START WITH 1 INCREMENT BY 1;
+
+-- PL/SQL Procedure: Assign class based on total_marks using custom grading
+CREATE OR REPLACE PROCEDURE proc_grade(sname IN stud_marks.name%TYPE) AS 
+  grade VARCHAR(20);
+  total stud_marks.total_marks%TYPE;
+BEGIN
+  SELECT total_marks INTO total FROM stud_marks WHERE name = sname;
+  DBMS_OUTPUT.PUT_LINE('total_marks:=' || total);
+
+  IF total >= 825 AND total <= 899 THEN
+    grade := 'Higher Second Class';
+    INSERT INTO result VALUES(s2.NEXTVAL, sname, grade);
+  ELSIF total >= 900 AND total <= 989 THEN
+    grade := 'First Class';
+    INSERT INTO result VALUES(s2.NEXTVAL, sname, grade);
+  ELSIF total >= 990 AND total <= 1500 THEN
+    grade := 'Distinction';
+    INSERT INTO result VALUES(s2.NEXTVAL, sname, grade);
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('failed student');
+  END IF;
+END proc_grade;
+/
+
+-- Execute the procedure for each student
+BEGIN
+  proc_grade('Aditya');
+  proc_grade('Arnav');
+  proc_grade('Arjun');
+  proc_grade('Amay');
+  proc_grade('Ashish');
+END;
+/
+
+-- View the result table after procedure execution
+SELECT * FROM result;
+
+-- To reset, delete all records from result
+DELETE FROM result;
+
+-- Re-run procedure if needed
+BEGIN
+  proc_grade('Aditya');
+  proc_grade('Arnav');
+  proc_grade('Arjun');
+  proc_grade('Amay');
+  proc_grade('Ashish');
+END;
+/
+
+-- Final view of result table
+SELECT * FROM result;
