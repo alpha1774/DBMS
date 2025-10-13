@@ -1,0 +1,171 @@
+CREATE TABLE Employee (
+    employee_name VARCHAR(100) NOT NULL,
+    street VARCHAR(100),
+    city VARCHAR(100),
+    PRIMARY KEY (employee_name)
+);
+-- Query OK, 0 rows affected (0.03 sec)
+
+INSERT INTO Employee (employee_name, street, city) VALUES
+('Alice', 'Maple Street', 'Mumbai'),
+('Bob', 'Oak Avenue', 'Pune'),
+('Charlie', 'Pine Lane', 'Delhi');
+-- Query OK, 3 rows affected (0.02 sec)
+-- Records: 3 Duplicates: 0 Warnings: 0
+
+SELECT * FROM Employee;
+-- employee_name | street       | city
+-- Alice         | Maple Street | Mumbai
+-- Bob           | Oak Avenue   | Pune
+-- Charlie       | Pine Lane    | Delhi
+-- 3 rows in set (0.00 sec)
+
+CREATE TABLE Company (
+    company_name VARCHAR(100) NOT NULL,
+    city VARCHAR(100),
+    PRIMARY KEY (company_name)
+);
+-- Query OK, 0 rows affected (0.03 sec)
+
+INSERT INTO Company(company_name, city) VALUES
+('Google', 'Bangalore'),
+('TCS', 'Mumbai'),
+('Infosys', 'Pune');
+-- Query OK, 3 rows affected (0.01 sec)
+-- Records: 3 Duplicates: 0 Warnings: 0
+
+SELECT * FROM Company;
+-- company_name | city
+-- Google       | Bangalore
+-- Infosys      | Pune
+-- TCS          | Mumbai
+-- 3 rows in set (0.00 sec)
+
+CREATE TABLE Works (
+    employee_name VARCHAR(100),
+    company_name VARCHAR(100),
+    salary DECIMAL(10,2),
+    FOREIGN KEY (employee_name) REFERENCES Employee (employee_name),
+    FOREIGN KEY (company_name) REFERENCES Company (company_name)
+);
+-- Query OK, 0 rows affected (0.07 sec)
+
+CREATE TABLE Manages (
+    employee_name VARCHAR(100),
+    manager_name VARCHAR(100),
+    FOREIGN KEY (employee_name) REFERENCES Employee (employee_name),
+    FOREIGN KEY (manager_name) REFERENCES Employee (employee_name)
+);
+-- Query OK, 0 rows affected (0.08 sec)
+
+INSERT INTO Manages (employee_name, manager_name) VALUES
+('Bob', 'Alice'),
+('Charlie', 'Alice');
+-- Query OK, 2 rows affected (0.01 sec)
+-- Records: 2 Duplicates: 0 Warnings: 0
+
+SELECT * FROM Manages;
+-- employee_name | manager_name
+-- Bob           | Alice
+-- Charlie       | Alice
+-- 2 rows in set (0.00 sec)
+
+ALTER TABLE Works
+ADD CONSTRAINT chk_salary_positive
+CHECK (salary > 0);
+-- Query OK, 0 rows affected (0.11 sec)
+-- Records: 0 Duplicates: 0 Warnings: 0
+
+INSERT INTO Works (employee_name, company_name, salary)
+VALUES ('Alice', 'TCS', -5000);
+-- ERROR 3819 (HY000): Check constraint 'chk_salary_positive' is violated.
+
+ALTER TABLE Employee
+ADD CONSTRAINT chk_emp_name_not_empty
+CHECK (employee_name <> '');
+-- Query OK, 3 rows affected (0.08 sec)
+-- Records: 3 Duplicates: 0 Warnings: 0
+
+INSERT INTO Employee (employee_name, street, city)
+VALUES ('', 'TestStreet', 'Nowhere');
+-- ERROR 3819 (HY000): Check constraint 'chk_emp_name_not_empty' is violated.
+
+CREATE INDEX idx_employee_name ON Employee (employee_name);
+-- Query OK, 0 rows affected (0.06 sec)
+-- Records: 0 Duplicates: 0 Warnings: 0
+
+CREATE INDEX idx_works_emp_salary ON Works (employee_name, salary);
+-- Query OK, 0 rows affected (0.04 sec)
+-- Records: 0 Duplicates: 0 Warnings: 0
+
+SELECT * FROM Works
+WHERE employee_name = 'Alice' AND salary > 50000;
+-- Empty set (0.00 sec)
+
+CREATE VIEW employee_city_view AS
+SELECT employee_name, city FROM Employee;
+-- Query OK, 0 rows affected (0.02 sec)
+
+SELECT * FROM employee_city_view;
+-- employee_name | city
+-- Alice         | Mumbai
+-- Bob           | Pune
+-- Charlie       | Delhi
+-- 3 rows in set (0.00 sec)
+
+CREATE VIEW high_earners_view AS
+SELECT employee_name, salary
+FROM Works
+WHERE salary > 50000;
+-- Query OK, 0 rows affected (0.02 sec)
+
+SELECT * FROM high_earners_view;
+-- Empty set (0.00 sec)
+
+ALTER TABLE Employee
+ADD COLUMN emp_id INT AUTO_INCREMENT UNIQUE;
+-- Query OK, 0 rows affected (0.13 sec)
+-- Records: 0 Duplicates: 0 Warnings: 0
+
+INSERT INTO Employee (employee_name, street, city)
+VALUES ('David', 'Birch Lane', 'Chennai');
+-- Query OK, 1 row affected (0.01 sec)
+
+SELECT * FROM Employee;
+-- employee_name | street       | city    | emp_id
+-- Alice         | Maple Street | Mumbai  | 1
+-- Bob           | Oak Avenue   | Pune    | 2
+-- Charlie       | Pine Lane    | Delhi   | 3
+-- David         | Birch Lane   | Chennai | 4
+-- 4 rows in set (0.00 sec)
+
+CREATE TABLE SalarySequence (
+    next_salary INT DEFAULT 40000
+);
+-- Query OK, 0 rows affected (0.03 sec)
+
+INSERT INTO SalarySequence (next_salary) VALUES(40000);
+-- Query OK, 1 row affected (0.02 sec)
+
+DELIMITER //
+
+CREATE TRIGGER set_auto_salary
+BEFORE INSERT ON Works
+FOR EACH ROW
+BEGIN
+    IF NEW.salary IS NULL THEN
+        SET NEW.salary = (SELECT next_salary FROM SalarySequence);
+        UPDATE SalarySequence SET next_salary = next_salary + 1000;
+    END IF;
+END;
+//
+DELIMITER ;
+-- Query OK, 0 rows affected (0.02 sec)
+
+INSERT INTO Works (employee_name, company_name)
+VALUES ('David', 'Infosys');
+-- Query OK, 1 row affected (0.02 sec)
+
+INSERT INTO Works (employee_name, company_name)
+VALUES ('David', 'Infosys');
+-- Query OK, 1 row affected (0.01 sec)
