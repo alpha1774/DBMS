@@ -1,0 +1,113 @@
+-- Create tables
+CREATE TABLE Cust_New (
+  ID INT,
+  Name VARCHAR2(10),
+  City VARCHAR2(10),
+  Salary INT
+);
+
+CREATE TABLE Cust_Old (
+  ID INT,
+  Name VARCHAR2(10),
+  City VARCHAR2(10),
+  Salary INT
+);
+
+-- Describe tables
+DESC Cust_New;
+DESC Cust_Old;
+
+-- Insert data into Cust_New
+INSERT INTO Cust_New VALUES (1, 'Ajay', 'Pune', 20000);
+INSERT INTO Cust_New VALUES (2, 'Ramesh', 'Pune', 15000);
+INSERT INTO Cust_New VALUES (3, 'Umesh', 'Pune', 40000);
+INSERT INTO Cust_New VALUES (4, 'Ram', 'Pune', 25000);
+
+-- Insert data into Cust_Old
+INSERT INTO Cust_Old VALUES (1, 'Ramesh', 'Pune', 15000);
+INSERT INTO Cust_Old VALUES (5, 'Sunil', 'Pune', 45000);
+
+-- Select data to verify
+SELECT * FROM Cust_New;
+SELECT * FROM Cust_Old;
+
+-- Implicit Cursor Example
+DECLARE
+  no Cust_New.ID%TYPE;
+  totrecord INT;
+BEGIN
+  no := &no;
+  SELECT ID INTO no FROM Cust_New WHERE ID = no;
+  IF SQL%FOUND THEN
+    totrecord := SQL%ROWCOUNT;
+    DBMS_OUTPUT.PUT_LINE('total number of records:=' || totrecord);
+  END IF;
+END;
+/
+
+-- Explicit Cursor Example
+DECLARE
+  CURSOR c1 IS SELECT * FROM Cust_New;
+  c1_id Cust_New.ID%TYPE;
+  c1_name Cust_New.Name%TYPE;
+  c1_city Cust_New.City%TYPE;
+  c1_sal Cust_New.Salary%TYPE;
+BEGIN
+  OPEN c1;
+  LOOP
+    FETCH c1 INTO c1_id, c1_name, c1_city, c1_sal;
+    EXIT WHEN c1%NOTFOUND;
+    DBMS_OUTPUT.PUT_LINE(c1_id || ' ' || c1_name || ' ' || c1_city || ' ' || c1_sal);
+  END LOOP;
+  CLOSE c1;
+END;
+/
+
+-- For Loop Cursor Example
+DECLARE
+  CURSOR fc IS SELECT * FROM Cust_New WHERE salary >= 25000;
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('ID Name City Salary');
+  FOR tmp IN fc LOOP
+    DBMS_OUTPUT.PUT_LINE(tmp.id || ' ' || tmp.name || ' ' || tmp.city || ' ' || tmp.salary);
+  END LOOP;
+END;
+/
+
+-- Parameterized Cursor Example
+DECLARE
+  CURSOR pc(c_id NUMBER) IS SELECT * FROM Cust_New WHERE id = c_id;
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('ID Name City Salary');
+  FOR tmp IN pc(2) LOOP
+    DBMS_OUTPUT.PUT_LINE(tmp.id || ' ' || tmp.name || ' ' || tmp.city || ' ' || tmp.salary);
+  END LOOP;
+END;
+/
+
+-- Merge Table using Cursor
+DECLARE
+  CURSOR para_cursor(c_id NUMBER) IS SELECT * FROM Cust_Old WHERE ID = c_id;
+  cur_cust_old para_cursor%ROWTYPE;
+  flag NUMBER;
+BEGIN
+  flag := 0;
+  FOR i IN (SELECT id, name, city, salary FROM cust_new) LOOP
+    FOR cur_cust_old IN para_cursor(i.id) LOOP
+      UPDATE Cust_Old
+      SET name = i.name,
+          city = i.city,
+          salary = i.salary
+      WHERE id = i.id;
+      flag := 1;
+    END LOOP;
+    IF flag = 0 THEN
+      INSERT INTO Cust_Old VALUES (i.id, i.name, i.city, i.salary);
+    END IF;
+    flag := 0;
+  END LOOP;
+END;
+/
+
+-- Verify merge result
+SELECT * FROM Cust_Old;
