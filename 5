@@ -1,0 +1,79 @@
+-- Create Borrower table
+CREATE TABLE Borrower (
+  ROLLNO INT,
+  NAME VARCHAR2(20),
+  ISSUE DATE,
+  BOOKNAME VARCHAR2(30),
+  STAT VARCHAR2(2)
+);
+
+-- Insert records into Borrower table
+INSERT INTO Borrower VALUES 
+  (1, 'yash', TO_DATE('12-JUN-08', 'DD-MON-RR'), 'sql', 'i'),
+  (2, 'shreyash', TO_DATE('12-AUG-23', 'DD-MON-RR'), 'mysql', 'i'),
+  (3, 'om', TO_DATE('15-MAR-23', 'DD-MON-RR'), 'sql', 'i'),
+  (4, 'omkar', TO_DATE('19-NOV-24', 'DD-MON-RR'), 'python', 'i');
+
+-- Create Fine table
+CREATE TABLE Fine (
+  ROLL_NO INT,
+  DOI DATE,
+  AMT INT
+);
+
+-- PL/SQL procedure to calculate fine
+DECLARE
+  roll_no Borrower.ROLLNO%TYPE;
+  name Borrower.NAME%TYPE;
+  days INT;
+  fine_pd INT;
+  DOI Borrower.ISSUE%TYPE;
+  e EXCEPTION;
+BEGIN
+  roll_no := &roll_no;
+  name := '&name';
+
+  IF SQL%NOTFOUND THEN
+    RAISE e;
+  END IF;
+
+  SELECT ISSUE INTO DOI FROM Borrower WHERE ROLLNO = roll_no AND NAME = name;
+
+  days := SYSDATE - DOI;
+
+  IF days < 15 THEN
+    fine_pd := 0;
+    DBMS_OUTPUT.PUT_LINE('No fine');
+  ELSIF days >= 15 AND days <= 30 THEN
+    fine_pd := (days - 15) * 5;
+    INSERT INTO Fine VALUES (roll_no, SYSDATE, fine_pd);
+  ELSE
+    fine_pd := (5 * 15) + ((days - 30) * 50);
+    INSERT INTO Fine VALUES (roll_no, SYSDATE, fine_pd);
+  END IF;
+
+EXCEPTION
+  WHEN e THEN
+    DBMS_OUTPUT.PUT_LINE('Given Data Not Found');
+END;
+/
+
+
+
+
+-- Verify Borrower table data
+SELECT * FROM Borrower;
+
+-- Execute fine calculation procedure
+@proc5.sql
+-- Enter values when prompted:
+-- roll_no: 1
+-- name: 'yash'
+
+-- Verify Fine table data after procedure execution
+SELECT * FROM Fine;
+
+-- Expected output for Fine table
+-- ROLL_NO | DOI       | AMT
+-- --------|-----------|-------
+-- 1       | 07-OCT-25 | 314875
