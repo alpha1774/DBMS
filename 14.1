@@ -1,0 +1,46 @@
+from pymongo import MongoClient
+
+client = MongoClient("mongodb://localhost:27017/")
+db = client["mydb"]
+coll = db["Stud"]
+
+coll.delete_many({})
+
+doc1 = {"rno": "1", "name": "Aditya"}
+doc2 = {"rno": "2", "name": "Kruhna"}
+coll.insert_many([doc1, doc2])
+
+print("After insert:")
+for doc in coll.find():
+    print(doc)
+
+query = {"rno": "2"}
+new_values = {"$set": {"name": "Harshal"}}
+update_result = coll.update_one(query, new_values)
+
+print("\nUpdate result:")
+print("Matched:", update_result.matched_count)
+print("Modified:", update_result.modified_count)
+
+print("\nAfter trying to update Ganesh to Harshal:")
+for doc in coll.find():
+    print(doc)
+
+query2 = {"name": "Aditya"}
+new_values2 = {"$set": {"name": "Harshal"}}
+update_result2 = coll.update_one(query2, new_values2)
+
+print("\nUpdate result 2:")
+print("Matched:", update_result2.matched_count)
+print("Modified:", update_result2.modified_count)
+
+print("\nAfter updating Aditya to Harshal:")
+for doc in coll.find():
+    print(doc)
+
+delete_result = coll.delete_one({"name": "Harshal"})
+print("\nDeleted count:", delete_result.deleted_count)
+
+print("\nAfter delete:")
+for doc in coll.find():
+    print(doc)
